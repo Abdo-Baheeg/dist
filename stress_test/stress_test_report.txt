@@ -1,0 +1,59 @@
+============================================================
+  DISTRIBUTED LLM STRESS TEST REPORT
+  Generated: 2026-05-11T19:32:48.821898 UTC
+  Master URL: http://13.63.238.244
+============================================================
+
+[TEST CONFIGURATION]
+  Total users      : 1000
+  Concurrency      : 50
+  Ramp-up (s)      : 30
+  Request timeout  : 180s
+
+[PERFORMANCE METRICS]
+  Total requests           : 1000
+  Successful               : 853
+  Failed                   : 147
+  Success rate             : 85.30%
+  Wall time (s)            : 385.7
+  Throughput (req/s)       : 2.593
+  Latency mean (s)         : 9.338
+  Latency median (s)       : 8.801
+  Latency p90 (s)          : 16.165
+  Latency p95 (s)          : 18.197
+  Latency p99 (s)          : 21.539
+  Latency min (s)          : 1.431
+  Latency max (s)          : 27.764
+  Latency std (s)          : 4.998
+
+[WORKER DISTRIBUTION]
+  gpu-worker-3             : 213 requests (21.3%)
+  vhgghg-worker-2          : 193 requests (19.3%)
+  vhgghg-worker-3          : 192 requests (19.2%)
+  gpu-worker-2             : 181 requests (18.1%)
+  vhgghg-worker-1          : 74 requests (7.4%)
+
+[ERROR BREAKDOWN]
+  http_error          : 147
+
+[RETRY ANALYSIS]
+  1.0 attempt(s)          : 585 requests
+  2.0 attempt(s)          : 216 requests
+  3.0 attempt(s)          : 52 requests
+
+[SCHEDULER COMPARISON]
+  Scheduler                N     Mean      p50      p90      p95
+  -------------------------------------------------------
+  round_robin             30     3.30     3.36     4.92     5.09
+  least_connections       29     2.87     2.88     3.57     3.79
+  load_aware              30     3.01     2.74     4.30     4.55
+
+[OUTPUT FILES]
+  stress_test_results.csv — full request/response log
+  stress_test_charts.png — performance charts
+  scheduler_comparison.png — scheduler comparison chart
+  comparison_round_robin.csv — per-scheduler request log
+  comparison_least_connections.csv — per-scheduler request log
+  comparison_load_aware.csv — per-scheduler request log
+
+============================================================
