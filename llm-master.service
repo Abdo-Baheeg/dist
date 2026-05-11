@@ -1,0 +1,71 @@
+# =========================================================
+# /etc/systemd/system/llm-master.service
+#
+# WHY --workers 1?
+# ─────────────────
+# master.py keeps ALL state (registered workers, counters, circuit
+# breaker) in Python in-memory dicts.  Running multiple uvicorn
+# worker PROCESSES means each process has its own empty dict — so
+# a GPU worker that registers to process A is invisible to process B.
+#
+# FastAPI with asyncio handles hundreds of concurrent requests in a
+# single process without blocking.  One process is the right model
+# for a stateful orchestrator.  If you need multi-process HA, move
+# state to Redis and set --workers N.
+#
+# SETUP:
+#   sudo cp llm-master.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable llm-master
+#   sudo systemctl start llm-master
+#   sudo systemctl status llm-master
+#
+# USEFUL COMMANDS:
+#   sudo journalctl -u llm-master -f   ← live logs
+#   sudo systemctl restart llm-master
+# =========================================================
+
+[Unit]
+Description=LLM Distributed Master Scheduler
+After=network.target
+Wants=network-online.target
+
+[Service]
+# ---- identity ----
+User=ubuntu
+Group=ubuntu
+
+# ---- paths ----
+WorkingDirectory=/home/ubuntu/llm-master
+
+# Use your virtualenv if you have one:
+# ExecStart=/home/ubuntu/llm-master/venv/bin/uvicorn master:app \
+ExecStart=/usr/bin/python3 -m uvicorn master:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 1 \
+    --log-level info \
+    --access-log
+
+# ---- environment ----
+Environment="PYTHONUNBUFFERED=1"
+# Override any master.py constant here without touching code:
+# Environment="SCHEDULING_ALGORITHM=least_connections"
+# Environment="MAX_CONCURRENT_REQUESTS=100"
+# Environment="HEARTBEAT_TIMEOUT=30"
+# Environment="MAX_RETRIES=5"
+# Environment="REQUEST_TIMEOUT=180"
+
+# ---- restart policy ----
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# ---- resource limits ----
+LimitNOFILE=65536
+MemoryMax=1G
+CPUWeight=80
+
+[Install]
+WantedBy=multi-user.target
